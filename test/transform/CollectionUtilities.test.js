@@ -141,4 +141,69 @@ describe('CollectionUtilities', () => {
       assert.deepEqual(CollectionUtilities.collectDisambiguationHTML(element), [])
     })
   })
+
+  describe('.collectNearbyReferenceNodes()', () => {
+    it('collects expected reference nodes', () => {
+
+      document = domino.createDocument(`
+        <sup id="cite_ref-a" class="reference"><a id='a1' href="#cite_note-a">[4]</a></sup>
+        <sup id="cite_ref-b" class="reference"><a id='a2'  href="#cite_note-b">[6]</a></sup>
+        <sup id="cite_ref-c" class="reference"><a id='a3'  href="#cite_note-c">[7]</a></sup>
+        <span id="cite_note-a">0 1 2</span>
+        <span id="cite_note-b">3 4 5</span>
+        <span id="cite_note-c">6 7 8</span>
+      `)
+
+      const secondAnchor = document.querySelectorAll('A')[1]
+      const nearbyRefNodes = CollectionUtilities.collectNearbyReferenceNodes(secondAnchor)
+
+      assert.deepEqual(nearbyRefNodes.map(node => node.id), [
+        'cite_ref-a',
+        'a2',
+        'cite_ref-c'
+      ])
+    })
+  })  
+
+  describe('.collectNearbyReferences()', () => {
+    it('collects expected references group and selected index', () => {
+
+      const MOCK_RECT = { top: 0, left: 1, width: 2, height: 3 }
+
+      // Domino doesn't implement 'getBoundingClientRect' so
+      // backfill it for testing methods which call it.
+      var Element = domino.impl.Element
+      Element.prototype.getBoundingClientRect = () => {
+        return MOCK_RECT
+      }
+
+      document.documentElement.innerHTML = `
+        <sup id="cite_ref-a" class="reference"><a href="#cite_note-a">[4]</a></sup>
+        <sup id="cite_ref-b" class="reference"><a href="#cite_note-b">[6]</a></sup>
+        <sup id="cite_ref-c" class="reference"><a href="#cite_note-c">[7]</a></sup>
+        <span id="cite_note-a">0 1 2</span>
+        <span id="cite_note-b">3 4 5</span>
+        <span id="cite_note-c">6 7 8</span>
+      `
+
+      const secondAnchor = document.querySelectorAll('A')[1]
+      const nearbyReferences = CollectionUtilities.collectNearbyReferences(document, secondAnchor)
+
+      assert.equal(nearbyReferences.selectedIndex, 1)
+      assert.deepEqual(nearbyReferences.referencesGroup, [
+        { id: 'cite_ref-a',
+          rect: MOCK_RECT,
+          text: '[4]',
+          html: '0 1 2' },
+        { id: 'cite_ref-b',
+          rect: MOCK_RECT,
+          text: '[6]',
+          html: '3 4 5' },
+        { id: 'cite_ref-c',
+          rect: MOCK_RECT,
+          text: '[7]',
+          html: '6 7 8' } 
+      ])
+    })
+  })
 })
