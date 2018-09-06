@@ -41,6 +41,7 @@
       const configuration = {
         baseURL: '',
         title: 'Ice cream',
+        viewInBrowserLabel: 'View page in browser',
         readMore: {
           header: 'Read more',
           limit: 3,
@@ -70,7 +71,8 @@
       transformer.add(window, container, configuration.baseURL, configuration.title,
         configuration.readMore.header, configuration.readMore.limit, configuration.license.template,
         configuration.license.substitution, configuration.license.substitutionClickCallback,
-        configuration.readMore.loadCallback, configuration.readMore.saveClickHandler)
+        configuration.viewInBrowserLabel, configuration.readMore.loadCallback,
+        configuration.readMore.saveClickHandler)
       pagelib.FooterContainer.updateLeftAndRightMargin(16, window.document)
     </script>
   </body>
